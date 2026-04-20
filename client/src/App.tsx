@@ -1,18 +1,23 @@
 import { useState } from "react";
-import Upload from "./components/Upload";
-import Chat from "./components/Chat";
+import type { DocumentItem } from "./types";
+import Sidebar from "./components/Sidebar";
+import ChatWindow from "./components/ChatWindow";
 
-
-function App() {
-  const [docId, setDocId] = useState<string | null>(null);
+export default function App() {
+  const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [activeDoc, setActiveDoc] =
+    useState<DocumentItem | null>(null);
 
   return (
-    <div>
-      <Upload setDocId={setDocId} />
+    <div className="h-screen flex bg-slate-100">
+      <Sidebar
+        documents={documents}
+        setDocuments={setDocuments}
+        activeDoc={activeDoc}
+        setActiveDoc={setActiveDoc}
+      />
 
-      {docId && <Chat docId={docId} />}
+      <ChatWindow activeDoc={activeDoc} />
     </div>
   );
 }
-
-export default App;
