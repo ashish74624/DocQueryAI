@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, type SetStateAction } from "react";
 
-function Upload() {
+type UploadProps = {
+    setDocId: React.Dispatch<SetStateAction<string | null>>;
+};
+
+function Upload({ setDocId }: UploadProps) {
     const [file, setFile] = useState<File | null>(null);
 
     const uploadFile = async (): Promise<void> => {
@@ -22,8 +26,8 @@ function Upload() {
                 throw new Error("Upload failed");
             }
 
-            const data = await response.json();
-            console.log(data);
+            const data: { doc_id: string } = await response.json();
+            setDocId(data.doc_id);
         } catch (error) {
             console.error("Error uploading file:", error);
         }
@@ -33,7 +37,6 @@ function Upload() {
         <div>
             <input
                 type="file"
-                accept="application/pdf"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     if (e.target.files && e.target.files.length > 0) {
                         setFile(e.target.files[0]);
@@ -41,7 +44,7 @@ function Upload() {
                 }}
             />
 
-            <button onClick={uploadFile}>Upload PDF</button>
+            <button onClick={uploadFile}>Upload</button>
         </div>
     );
 }

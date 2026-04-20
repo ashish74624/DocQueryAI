@@ -5,6 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from ingest import ingest_pdf
 from config import UPLOAD_DIR
+from pydantic import BaseModel
+
+from retriever import retrieve_chunks
+from llm import generate_answer
+
 
 app = FastAPI()
 
@@ -41,4 +46,36 @@ async def upload_pdf(file: UploadFile = File(...)):
         "message": "Upload successful",
         "doc_id": doc_id,
         "details": result
+    }
+
+
+
+class AskRequest(BaseModel):
+    doc_id: str
+    question: str
+
+
+@app.post("/ask")
+def ask_question(payload: AskRequest):
+    docs = retrieve_chunks(
+        payload.doc_id,
+        payload.question
+    )
+
+    answer = generate_answer(
+        payload.question,
+        docs
+    )
+
+    sources = []
+
+    for doc in docs:
+        sources.append({
+            "page": doc.metadata.get("page"),
+            "snippet": doc.page_content[:250]
+        })
+
+    return {
+        "answer": answer,
+        "sources": sources
     }
