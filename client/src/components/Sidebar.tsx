@@ -1,45 +1,88 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { DocumentItem } from "../types";
 import UploadBox from "./UploadBox";
 
 interface Props {
     documents: DocumentItem[];
-    setDocuments: React.Dispatch<
-        React.SetStateAction<DocumentItem[]>
-    >;
-    activeDoc: DocumentItem | null;
-    setActiveDoc: (doc: DocumentItem) => void;
+    setDocuments: any;
+    mode: string;
+    setMode: any;
 }
 
 export default function Sidebar({
     documents,
     setDocuments,
-    activeDoc,
-    setActiveDoc,
+    setMode
 }: Props) {
+    const toggleDoc = (id: string) => {
+        setDocuments((prev: DocumentItem[]) =>
+            prev.map((doc) =>
+                doc.id === id
+                    ? {
+                        ...doc,
+                        selected:
+                            !doc.selected
+                    }
+                    : doc
+            )
+        );
+    };
+
     return (
-        <div className="w-72 bg-white border-r p-4 flex flex-col">
+        <div className="w-80 bg-white border-r p-4">
             <h1 className="text-xl font-bold mb-4">
-                DocuQuery
+                Documents
             </h1>
 
             <UploadBox
                 setDocuments={setDocuments}
-                setActiveDoc={setActiveDoc}
             />
 
-            <div className="mt-6 space-y-2 overflow-y-auto">
+            <div className="mt-5">
                 {documents.map((doc) => (
-                    <button
+                    <label
                         key={doc.id}
-                        onClick={() => setActiveDoc(doc)}
-                        className={`w-full text-left px-3 py-2 rounded-lg transition ${activeDoc?.id === doc.id
-                                ? "bg-blue-600 text-white"
-                                : "bg-slate-100 hover:bg-slate-200"
-                            }`}
+                        className="flex gap-2 py-2"
                     >
+                        <input
+                            type="checkbox"
+                            checked={
+                                doc.selected
+                            }
+                            onChange={() =>
+                                toggleDoc(doc.id)
+                            }
+                        />
+
                         {doc.name}
-                    </button>
+                    </label>
                 ))}
+            </div>
+
+            <div className="mt-6">
+                <p className="font-semibold mb-2">
+                    Search Mode
+                </p>
+
+                <button
+                    onClick={() =>
+                        setMode(
+                            "selected"
+                        )
+                    }
+                    className="mr-2 px-3 py-2 bg-slate-200 rounded"
+                >
+                    Selected
+                </button>
+
+                <button
+                    onClick={() =>
+                        setMode("all")
+                    }
+                    className="px-3 py-2 bg-slate-200 rounded"
+                >
+                    All Docs
+                </button>
             </div>
         </div>
     );

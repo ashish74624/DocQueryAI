@@ -1,101 +1,92 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { askQuestion } from "../lib/api";
-import MessageBubble from "./MessageBubble";
-import type { DocumentItem, Message } from "../types";
-
-interface Props {
-    activeDoc: DocumentItem | null;
-}
+import { askDocs } from "../lib/api";
 
 export default function ChatWindow({
-    activeDoc,
-}: Props) {
-    const [question, setQuestion] = useState("");
-    const [messages, setMessages] = useState<Message[]>(
-        []
-    );
-    const [loading, setLoading] = useState(false);
+    documents,
+    mode
+}: any) {
+    const [question, setQuestion] =
+        useState("");
 
-    const handleAsk = async () => {
-        if (!question || !activeDoc) return;
+    const [answer, setAnswer] =
+        useState("");
 
-        const userMsg: Message = {
-            role: "user",
-            text: question,
-        };
+    const [sources, setSources] =
+        useState([]);
 
-        setMessages((prev) => [...prev, userMsg]);
-        setLoading(true);
+    const ask = async () => {
+        const selected =
+            documents
+                .filter(
+                    (d: any) =>
+                        d.selected
+                )
+                .map(
+                    (d: any) => d.id
+                );
 
-        try {
-            const data = await askQuestion(
-                activeDoc.id,
-                question
+        const data =
+            await askDocs(
+                question,
+                mode,
+                selected
             );
 
-            const botMsg: Message = {
-                role: "assistant",
-                text: data.answer,
-                sources: data.sources,
-            };
-
-            setMessages((prev) => [...prev, botMsg]);
-            setQuestion("");
-        } catch {
-            alert("Failed to ask question");
-        }
-
-        setLoading(false);
+        setAnswer(data.answer);
+        setSources(data.sources);
     };
 
-    if (!activeDoc) {
-        return (
-            <div className="flex-1 flex items-center justify-center text-slate-500">
-                Upload and select a PDF to begin.
-            </div>
-        );
-    }
-
     return (
-        <div className="flex-1 flex flex-col">
-            <div className="p-4 border-b bg-white font-semibold">
-                {activeDoc.name}
-            </div>
+        <div className="flex-1 p-6">
+            <h2 className="text-lg font-bold mb-4">
+                Ask Documents
+            </h2>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {messages.map((msg, index) => (
-                    <MessageBubble
-                        key={index}
-                        message={msg}
-                    />
-                ))}
-
-                {loading && (
-                    <div className="text-slate-500">
-                        Thinking...
-                    </div>
-                )}
-            </div>
-
-            <div className="p-4 border-t bg-white flex gap-2">
+            <div className="flex gap-2">
                 <input
                     value={question}
                     onChange={(e) =>
-                        setQuestion(e.target.value)
+                        setQuestion(
+                            e.target.value
+                        )
                     }
-                    placeholder="Ask about this document..."
-                    className="flex-1 border rounded-lg px-4 py-2"
-                    onKeyDown={(e) =>
-                        e.key === "Enter" && handleAsk()
-                    }
+                    className="flex-1 border px-4 py-2 rounded"
                 />
 
                 <button
-                    onClick={handleAsk}
-                    className="bg-blue-600 text-white px-5 rounded-lg"
+                    onClick={ask}
+                    className="bg-blue-600 text-white px-4 rounded"
                 >
-                    Send
+                    Ask
                 </button>
+            </div>
+
+            <div className="mt-6 bg-white p-4 rounded border">
+                {answer}
+            </div>
+
+            <div className="mt-4 space-y-3">
+                {sources.map(
+                    (
+                        s: any,
+                        i
+                    ) => (
+                        <div
+                            key={i}
+                            className="bg-white border rounded p-3"
+                        >
+                            <p className="font-semibold">
+                                {s.filename} —
+                                Page {s.page}
+                            </p>
+
+                            <p className="text-sm text-slate-600">
+                                {s.snippet}
+                            </p>
+                        </div>
+                    )
+                )}
             </div>
         </div>
     );

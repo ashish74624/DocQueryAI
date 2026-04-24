@@ -1,23 +1,30 @@
 import { useState } from "react";
-import type { DocumentItem } from "./types";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
+import type { DocumentItem } from "./types";
 
 export default function App() {
-  const [documents, setDocuments] = useState<DocumentItem[]>([]);
-  const [activeDoc, setActiveDoc] =
-    useState<DocumentItem | null>(null);
+  const [documents, setDocuments] =
+    useState<DocumentItem[]>([]);
+
+  const [mode, setMode] =
+    useState<"selected" | "all">(
+      "selected"
+    );
 
   return (
     <div className="h-screen flex bg-slate-100">
       <Sidebar
         documents={documents}
         setDocuments={setDocuments}
-        activeDoc={activeDoc}
-        setActiveDoc={setActiveDoc}
+        mode={mode}
+        setMode={setMode}
       />
 
-      <ChatWindow activeDoc={activeDoc} />
+      <ChatWindow
+        documents={documents}
+        mode={mode}
+      />
     </div>
   );
 }

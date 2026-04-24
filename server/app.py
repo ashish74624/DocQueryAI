@@ -1,15 +1,14 @@
 import os
 import uuid
+
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-
-from ingest import ingest_pdf
-from config import UPLOAD_DIR
 from pydantic import BaseModel
 
-from retriever import retrieve_chunks
+from config import UPLOAD_DIR
+from ingest import ingest_pdf
+from retriever import retrieve_docs
 from llm import generate_answer
-
 
 app = FastAPI()
 
@@ -20,45 +19,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-os.makedirs("uploads", exist_ok=True)
-os.makedirs("vectorstores", exist_ok=True)
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+class AskRequest(BaseModel):
+    question: str
+    mode: str
+    selected_docs: list[str]
 
 
 @app.post("/upload")
-async def upload_pdf(file: UploadFile = File(...)):
-    if not file.filename.endswith(".pdf"):
-        return {"error": "Only PDF files supported"}
-
+async def upload(file: UploadFile = File(...)):
     doc_id = str(uuid.uuid4())
 
-    file_path = os.path.join(
+    path = os.path.join(
         UPLOAD_DIR,
         f"{doc_id}_{file.filename}"
     )
 
-    with open(file_path, "wb") as f:
-        content = await file.read()
-        f.write(content)
+    with open(path, "wb") as f:
+        f.write(await file.read())
 
-    result = ingest_pdf(file_path, doc_id)
+    result = ingest_pdf(
+        path,
+        doc_id,
+        file.filename
+    )
 
     return {
-        "message": "Upload successful",
         "doc_id": doc_id,
+        "filename": file.filename,
         "details": result
     }
 
 
-
-class AskRequest(BaseModel):
-    doc_id: str
-    question: str
-
-
 @app.post("/ask")
-def ask_question(payload: AskRequest):
-    docs = retrieve_chunks(
-        payload.doc_id,
+def ask(payload: AskRequest):
+    docs = retrieve_docs(
+        payload.mode,
+        payload.selected_docs,
         payload.question
     )
 
@@ -69,10 +68,11 @@ def ask_question(payload: AskRequest):
 
     sources = []
 
-    for doc in docs:
+    for d in docs:
         sources.append({
-            "page": doc.metadata.get("page"),
-            "snippet": doc.page_content[:250]
+            "filename": d.metadata["filename"],
+            "page": d.metadata.get("page", 1),
+            "snippet": d.page_content[:220]
         })
 
     return {

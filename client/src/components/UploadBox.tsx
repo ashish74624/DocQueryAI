@@ -1,62 +1,38 @@
-import { useState } from "react";
-import { uploadDocument } from "../lib/api";
-import type { DocumentItem } from "../types";
-
-interface Props {
-    setDocuments: React.Dispatch<
-        React.SetStateAction<DocumentItem[]>
-    >;
-    setActiveDoc: (doc: DocumentItem) => void;
-}
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { uploadDoc } from "../lib/api";
 
 export default function UploadBox({
-    setDocuments,
-    setActiveDoc,
-}: Props) {
-    const [file, setFile] = useState<File | null>(null);
-    const [loading, setLoading] = useState(false);
+    setDocuments
+}: any) {
+    const upload = async (
+        e: any
+    ) => {
+        const file =
+            e.target.files[0];
 
-    const handleUpload = async () => {
         if (!file) return;
 
-        setLoading(true);
+        const data =
+            await uploadDoc(file);
 
-        try {
-            const data = await uploadDocument(file);
-
-            const newDoc = {
-                id: data.doc_id,
-                name: file.name,
-            };
-
-            setDocuments((prev) => [...prev, newDoc]);
-            setActiveDoc(newDoc);
-            setFile(null);
-        } catch  {
-            alert("Upload failed");
-        }
-
-        setLoading(false);
+        setDocuments(
+            (prev: any) => [
+                ...prev,
+                {
+                    id: data.doc_id,
+                    name: data.filename,
+                    selected: true
+                }
+            ]
+        );
     };
 
     return (
-        <div className="space-y-2">
-            <input
-                type="file"
-                accept=".pdf"
-                onChange={(e) =>
-                    setFile(e.target.files?.[0] || null)
-                }
-                className="w-full text-sm"
-            />
-
-            <button
-                onClick={handleUpload}
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-            >
-                {loading ? "Uploading..." : "Upload PDF"}
-            </button>
-        </div>
+        <input
+            type="file"
+            accept=".pdf"
+            onChange={upload}
+            className="mb-4"
+        />
     );
 }
