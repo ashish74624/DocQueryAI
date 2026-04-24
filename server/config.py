@@ -14,6 +14,6 @@ CHUNK_OVERLAP = 200
 
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
-TOP_K = 5
+TOP_K = 6
 
 MODEL_NAME = "llama-3.1-8b-instant"

@@ -1,38 +1,31 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { uploadDoc } from "../lib/api";
 
-export default function UploadBox({
-    setDocuments
-}: any) {
-    const upload = async (
-        e: any
-    ) => {
-        const file =
-            e.target.files[0];
+import { uploadFile } from "../lib/api";
 
-        if (!file) return;
+export default function UploadBox(
+   
+) {
+    const handleUpload =
+        async (
+            e: React.ChangeEvent<HTMLInputElement>
+        ) => {
+            const file =
+                e.target.files?.[0];
 
-        const data =
-            await uploadDoc(file);
+            if (!file) return;
 
-        setDocuments(
-            (prev: any) => [
-                ...prev,
-                {
-                    id: data.doc_id,
-                    name: data.filename,
-                    selected: true
-                }
-            ]
-        );
-    };
+            await uploadFile(file);
+
+            window.location.reload();
+        };
 
     return (
         <input
             type="file"
             accept=".pdf"
-            onChange={upload}
-            className="mb-4"
+            onChange={
+                handleUpload
+            }
+            className="w-full"
         />
     );
 }

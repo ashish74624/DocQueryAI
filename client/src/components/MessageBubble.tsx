@@ -1,37 +1,30 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export default function MessageBubble(
+    props: any
+) {
+    const {
+        role,
+        text,
+    } = props;
 
-import type { Message } from "../types";
-import SourceCard from "./SourceCard";
-
-interface Props {
-    message: Message;
-}
-
-export default function MessageBubble({
-    message,
-}: Props) {
-    const isUser = message.role === "user";
+    const user =
+        role === "user";
 
     return (
         <div
-            className={`max-w-3xl ${isUser ? "ml-auto" : "mr-auto"
+            className={`max-w-3xl ${user
+                    ? "ml-auto"
+                    : "mr-auto"
                 }`}
         >
             <div
-                className={`p-4 rounded-xl ${isUser
+                className={`p-4 rounded-xl ${user
                         ? "bg-blue-600 text-white"
                         : "bg-white border"
                     }`}
             >
-                {message.text}
+                {text}
             </div>
-
-            {message.sources &&
-                message.sources.map((source, i) => (
-                    <SourceCard
-                        key={i}
-                        source={source}
-                    />
-                ))}
         </div>
     );
 }

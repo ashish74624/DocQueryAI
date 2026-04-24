@@ -13,14 +13,12 @@ def generate_answer(question, docs):
     )
 
     prompt = f"""
-You are an enterprise AI document assistant.
+You are an AI knowledge assistant.
 
-Use ONLY the provided context.
-
-Mention filenames if useful.
+Use ONLY provided context.
 
 If answer not found, say:
-"I couldn't find that in the uploaded documents."
+I couldn't find that in the uploaded files.
 
 Context:
 {context}

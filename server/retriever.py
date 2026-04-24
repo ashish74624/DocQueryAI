@@ -22,7 +22,7 @@ def load_db():
     return db
 
 
-def retrieve_docs(mode, selected_docs, question):
+def retrieve_docs(question, mode, selected_docs):
     db = load_db()
 
     docs = db.similarity_search(
