@@ -91,7 +91,6 @@ def create_session(
     payload: SessionCreate,
     db: Session = Depends(get_db)
 ):
-    print("HERE")
     session = ChatSession(
         title=payload.title
     )
