@@ -2,6 +2,54 @@
 export const API  = "http://127.0.0.1:8000";
 
 
+export function getToken() {
+  return localStorage.getItem(
+    "token"
+  );
+}
+
+export function logout() {
+  localStorage.removeItem(
+    "token"
+  );
+}
+
+async function request(
+  path: string,
+  options: RequestInit = {}
+) {
+  const token =
+    getToken();
+
+  const headers: any = {
+    "Content-Type":
+      "application/json",
+    ...(options.headers ||
+      {}),
+  };
+
+  if (token) {
+    headers[
+      "Authorization"
+    ] = `Bearer ${token}`;
+  }
+
+  const res =
+    await fetch(
+      `${API}${path}`,
+      {
+        ...options,
+        headers,
+      }
+    );
+
+  return res.json();
+}
+
+export const api = {
+  request,
+};
+
 
 export async function getDocuments() {
     const res = await fetch(`${API}/documents`);
