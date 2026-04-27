@@ -1,7 +1,7 @@
 import os
 import uuid
 
-from fastapi import FastAPI, UploadFile, File, Depends
+from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
@@ -13,6 +13,20 @@ from config import UPLOAD_DIR
 from ingest import ingest_pdf
 from retriever import retrieve_docs
 from llm import generate_answer
+
+
+from models import User
+from schemas import (
+    RegisterSchema,
+    LoginSchema
+)
+
+from auth import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    get_current_user
+)
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,6 +46,92 @@ app.add_middleware(
 def root():
     return {"message": "DocuQuery API Running"}
 
+
+@app.post("/register")
+def register(
+    payload: RegisterSchema,
+    db: Session = Depends(get_db)
+):
+    existing = db.query(User).filter(
+        User.email == payload.email
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already exists"
+        )
+
+    user = User(
+        name=payload.name,
+        email=payload.email,
+        hashed_password=hash_password(
+            payload.password
+        )
+    )
+
+    db.add(user)
+    db.commit()
+
+    return {
+        "message":
+        "Registered successfully"
+    }
+
+
+@app.post("/login")
+def login(
+    payload: LoginSchema,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(
+        User.email == payload.email
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+        )
+
+    valid = verify_password(
+        payload.password,
+        user.hashed_password
+    )
+
+    if not valid:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials"
+        )
+
+    token = create_access_token(
+        {
+            "user_id":
+            user.id
+        }
+    )
+
+    return {
+        "access_token":
+        token,
+        "token_type":
+        "bearer",
+        "name":
+        user.name
+    }
+
+@app.get("/me")
+def me(
+    user = Depends(
+        get_current_user
+    )
+):
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email
+    }
 
 # --------------------
 # Upload PDF
@@ -76,12 +176,14 @@ async def upload_file(
 # --------------------
 @app.get("/documents")
 def get_documents(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
 ):
-    docs = db.query(Document).all()
+    docs = db.query(Document).filter(
+        Document.user_id == user.id
+    ).all()
 
     return docs
-
 
 # --------------------
 # Sessions

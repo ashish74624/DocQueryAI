@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class SessionCreate(BaseModel):
@@ -10,3 +10,15 @@ class AskRequest(BaseModel):
     question: str
     mode: str
     selected_docs: list[str]
+
+
+
+class RegisterSchema(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+
+
+class LoginSchema(BaseModel):
+    email: EmailStr
+    password: str
