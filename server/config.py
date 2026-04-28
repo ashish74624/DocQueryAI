@@ -15,5 +15,6 @@ CHUNK_OVERLAP = 200
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 TOP_K = 6
+WEATHER_API_KEY=os.getenv("WEATHER_API_KEY")
 
 MODEL_NAME = "llama-3.1-8b-instant"

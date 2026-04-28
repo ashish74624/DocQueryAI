@@ -1,32 +1,25 @@
 import os
 import uuid
-
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-
 from db import Base, engine, get_db
 from models import Document, ChatSession, Message
 from schemas import SessionCreate, AskRequest
-
 from config import UPLOAD_DIR
 from ingest import ingest_pdf
-from retriever import retrieve_docs
-from llm import generate_answer
-
-
 from models import User
 from schemas import (
     RegisterSchema,
     LoginSchema
 )
-
 from auth import (
     hash_password,
     verify_password,
     create_access_token,
     get_current_user
 )
+from graph import graph
 
 Base.metadata.create_all(bind=engine)
 
@@ -265,20 +258,6 @@ def ask(
             detail="Session not found"
         )
 
-    allowed_docs = db.query(Document).filter(
-        Document.user_id == user.id
-    ).all()
-
-    allowed_doc_ids = [
-        d.doc_id for d in allowed_docs
-    ]
-
-    selected_docs = [
-        d for d in payload.selected_docs
-        if d in allowed_doc_ids
-    ]
-
-    # save user message
     user_msg = Message(
         session_id=payload.session_id,
         role="user",
@@ -288,40 +267,40 @@ def ask(
     db.add(user_msg)
     db.commit()
 
-    # retrieve chunks
-    docs = retrieve_docs(
-        payload.question,
-        payload.mode,
-        selected_docs
-    )
+    history = db.query(Message).filter(
+        Message.session_id == payload.session_id
+    ).order_by(Message.id.asc()).all()
 
-    # generate answer
-    answer = generate_answer(
-        payload.question,
-        docs
-    )
+    memory = [
+        f"{m.role}: {m.content}"
+        for m in history[-10:]
+    ]
 
-    # save bot message
+    result = graph.invoke({
+    "question": payload.question,
+    "mode": payload.mode,
+    "selected_docs": payload.selected_docs,
+
+    "docs": [],
+    "answer": "",
+    "route": "",
+    "sources": [],
+    "meta": {},
+
+    "memory": memory
+})
+
     bot_msg = Message(
         session_id=payload.session_id,
         role="assistant",
-        content=answer
+        content=result["answer"]
     )
 
     db.add(bot_msg)
     db.commit()
 
-    # build sources
-    sources = []
-
-    for d in docs:
-        sources.append({
-            "filename": d.metadata.get("filename"),
-            "page": d.metadata.get("page"),
-            "snippet": d.page_content[:250]
-        })
-
     return {
-        "answer": answer,
-        "sources": sources
+        "answer": result["answer"],
+        "sources": result["sources"],
+        "meta": result["meta"]
     }
