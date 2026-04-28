@@ -1,4 +1,5 @@
 import { useState, type SetStateAction } from "react";
+import { api } from "../lib/api";
 
 type UploadProps = {
     setDocId: React.Dispatch<SetStateAction<string | null>>;
@@ -17,7 +18,7 @@ function Upload({ setDocId }: UploadProps) {
         formData.append("file", file);
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/upload", {
+            const response = await api.request("http://127.0.0.1:8000/upload", {
                 method: "POST",
                 body: formData,
             });
@@ -44,7 +45,7 @@ function Upload({ setDocId }: UploadProps) {
                 }}
             />
 
-            <button onClick={uploadFile}>Upload</button>
+            <button className="bg-green-500" onClick={uploadFile}>Upload</button>
         </div>
     );
 }

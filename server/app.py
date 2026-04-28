@@ -139,7 +139,8 @@ def me(
 @app.post("/upload")
 async def upload_file(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
 ):
     doc_id = str(uuid.uuid4())
 
@@ -158,6 +159,7 @@ async def upload_file(
     )
 
     doc = Document(
+        user_id=user.id,
         doc_id=doc_id,
         filename=file.filename
     )
@@ -166,10 +168,8 @@ async def upload_file(
     db.commit()
 
     return {
-        "doc_id": doc_id,
-        "filename": file.filename
+        "message": "Uploaded"
     }
-
 
 # --------------------
 # Documents
@@ -185,15 +185,18 @@ def get_documents(
 
     return docs
 
+
 # --------------------
 # Sessions
 # --------------------
 @app.post("/sessions")
 def create_session(
     payload: SessionCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
 ):
     session = ChatSession(
+        user_id=user.id,
         title=payload.title
     )
 
@@ -206,10 +209,14 @@ def create_session(
 
 @app.get("/sessions")
 def get_sessions(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
 ):
-    return db.query(ChatSession).all()
+    sessions = db.query(ChatSession).filter(
+        ChatSession.user_id == user.id
+    ).all()
 
+    return sessions
 
 # --------------------
 # Messages by session
@@ -217,11 +224,25 @@ def get_sessions(
 @app.get("/sessions/{session_id}/messages")
 def get_messages(
     session_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
 ):
-    return db.query(Message).filter(
+    session = db.query(ChatSession).filter(
+        ChatSession.id == session_id,
+        ChatSession.user_id == user.id
+    ).first()
+
+    if not session:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    msgs = db.query(Message).filter(
         Message.session_id == session_id
     ).all()
+
+    return msgs
 
 
 # --------------------
@@ -230,8 +251,34 @@ def get_messages(
 @app.post("/ask")
 def ask(
     payload: AskRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
 ):
+    session = db.query(ChatSession).filter(
+        ChatSession.id == payload.session_id,
+        ChatSession.user_id == user.id
+    ).first()
+
+    if not session:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    allowed_docs = db.query(Document).filter(
+        Document.user_id == user.id
+    ).all()
+
+    allowed_doc_ids = [
+        d.doc_id for d in allowed_docs
+    ]
+
+    selected_docs = [
+        d for d in payload.selected_docs
+        if d in allowed_doc_ids
+    ]
+
+    # save user message
     user_msg = Message(
         session_id=payload.session_id,
         role="user",
@@ -241,17 +288,20 @@ def ask(
     db.add(user_msg)
     db.commit()
 
+    # retrieve chunks
     docs = retrieve_docs(
         payload.question,
         payload.mode,
-        payload.selected_docs
+        selected_docs
     )
 
+    # generate answer
     answer = generate_answer(
         payload.question,
         docs
     )
 
+    # save bot message
     bot_msg = Message(
         session_id=payload.session_id,
         role="assistant",
@@ -261,13 +311,14 @@ def ask(
     db.add(bot_msg)
     db.commit()
 
+    # build sources
     sources = []
 
     for d in docs:
         sources.append({
-            "filename": d.metadata["filename"],
-            "page": d.metadata.get("page", 1),
-            "snippet": d.page_content[:220]
+            "filename": d.metadata.get("filename"),
+            "page": d.metadata.get("page"),
+            "snippet": d.page_content[:250]
         })
 
     return {

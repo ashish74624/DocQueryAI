@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { api } from "../lib/api";
 
 type ChatProps = {
     docId: string;
@@ -10,7 +11,7 @@ function Chat({ docId }: ChatProps) {
 
     const ask = async (): Promise<void> => {
         try {
-            const response = await fetch("http://127.0.0.1:8000/ask", {
+            const response = await api.request("http://127.0.0.1:8000/ask", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

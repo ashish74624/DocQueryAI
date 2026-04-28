@@ -1,111 +1,83 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const API  = "http://127.0.0.1:8000";
 
+export const API = "http://127.0.0.1:8000";
 
 export function getToken() {
-  return localStorage.getItem(
-    "token"
-  );
+  return localStorage.getItem("token");
 }
 
 export function logout() {
-  localStorage.removeItem(
-    "token"
-  );
+  localStorage.removeItem("token");
 }
 
 async function request(
   path: string,
   options: RequestInit = {}
 ) {
-  const token =
-    getToken();
+  const token = getToken();
 
   const headers: any = {
-    "Content-Type":
-      "application/json",
-    ...(options.headers ||
-      {}),
+    ...(options.headers || {}),
   };
 
-  if (token) {
-    headers[
-      "Authorization"
-    ] = `Bearer ${token}`;
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
   }
 
-  const res =
-    await fetch(
-      `${API}${path}`,
-      {
-        ...options,
-        headers,
-      }
-    );
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
-  return res.json();
+  const res = await fetch(`${API}${path}`, {
+    ...options,
+    headers,
+  });
+
+  return await res.json();
 }
 
 export const api = {
   request,
 };
 
-
 export async function getDocuments() {
-    const res = await fetch(`${API}/documents`);
-    return res.json();
-}
-
-export async function uploadFile(file: File) {
-    const fd = new FormData();
-    fd.append("file", file);
-
-    const res = await fetch(`${API}/upload`, {
-        method: "POST",
-        body: fd,
-    });
-
-    return res.json();
+  return await api.request("/documents");
 }
 
 export async function getSessions() {
-    const res = await fetch(`${API}/sessions`);
-    return res.json();
+  return await api.request("/sessions");
 }
 
 export async function createSession(title: string) {
-    const res = await fetch(`${API}/sessions`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title }),
-    });
-
-    return res.json();
+  return await api.request("/sessions", {
+    method: "POST",
+    body: JSON.stringify({ title }),
+  });
 }
 
 export async function getMessages(
-    sessionId: number
+  sessionId: number
 ) {
-    const res = await fetch(
-        `${API}/sessions/${sessionId}/messages`
-    );
-
-    return res.json();
+  return await api.request(
+    `/sessions/${sessionId}/messages`
+  );
 }
 
 export async function askQuestion(
-    payload: any
+  payload: any
 ) {
-    const res = await fetch(`${API}/ask`, {
-        method: "POST",
-        headers: {
-            "Content-Type":
-                "application/json",
-        },
-        body: JSON.stringify(payload),
-    });
+  return await api.request("/ask", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
 
-    return res.json();
+export async function uploadFile(file: File) {
+  const fd = new FormData();
+  fd.append("file", file);
+
+  return await api.request("/upload", {
+    method: "POST",
+    body: fd,
+  });
 }

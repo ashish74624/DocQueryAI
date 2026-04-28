@@ -76,9 +76,7 @@ export default function ChatWindow(
                 };
             await loadMessages();
 
-            setSources(
-                data.sources
-            );
+            setSources(data.sources || []);
 
             setQuestion("");
         };
@@ -161,6 +159,7 @@ export default function ChatWindow(
                 />
 
                 <button
+                    type="button"
                     onClick={ask}
                     className="bg-blue-600 text-white px-5 rounded"
                 >
