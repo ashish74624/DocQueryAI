@@ -8,7 +8,7 @@ class SessionCreate(BaseModel):
 class AskRequest(BaseModel):
     session_id: int
     question: str
-    mode: str
+    mode: str   # chat | rag | tool
     selected_docs: list[str]
 
 

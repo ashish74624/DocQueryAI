@@ -5,7 +5,7 @@ from llm import generate_rag_answer
 def rag_node(state):
     docs = retrieve_docs(
         state["question"],
-        state["mode"],
+        "selected",
         state["selected_docs"]
     )
 
@@ -15,8 +15,8 @@ def rag_node(state):
     )
 
     return {
-        "docs": docs,
         "answer": answer,
+        "docs": docs,
         "meta": {
             "used_docs": True,
             "used_model_knowledge": False,
