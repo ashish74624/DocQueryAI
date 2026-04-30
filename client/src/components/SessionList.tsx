@@ -34,7 +34,7 @@ export default function SessionList(
         };
 
     return (
-        <div className="mt-8">
+        <div className="mt-8 p-4 ">
             <div className="flex justify-between items-center mb-2">
                 <h2 className="font-semibold">
                     Chats

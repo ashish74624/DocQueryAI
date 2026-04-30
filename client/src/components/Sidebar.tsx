@@ -1,107 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import SessionList from "./SessionList";
-import UploadBox from "./UploadBox";
 
 export default function Sidebar(
     props: any
 ) {
     const {
-        documents,
-        selectedDocs,
-        setSelectedDocs,
         sessions,
         setSessions,
         activeSession,
         setActiveSession,
-        setMode,
+        user,
+        onLogout,
+        // setMode,
     } = props;
 
-    const toggleDoc = (
-        id: string
-    ) => {
-        if (
-            selectedDocs.includes(id)
-        ) {
-            setSelectedDocs(
-                selectedDocs.filter(
-                    (
-                        x: string
-                    ) => x !== id
-                )
-            );
-        } else {
-            setSelectedDocs([
-                ...selectedDocs,
-                id,
-            ]);
-        }
-    };
+
 
     return (
-        <div className="w-80 bg-white border-r p-4 overflow-y-auto">
-            <h1 className="text-xl font-bold mb-4">
+        <div className="w-64 bg-white border-r  overflow-y-auto relative">
+            <h1 className="text-xl font-bold mb-4 p-4">
                 DocuQuery
             </h1>
 
-            <UploadBox
-            />
-
-            <h2 className="font-semibold mt-6 mb-2">
-                Documents
-            </h2>
-
-            {documents.map(
-                (doc: any) => (
-                    <label
-                        key={doc.id}
-                        className="flex gap-2 py-1 text-sm"
-                    >
-                        <input
-                            type="checkbox"
-                            checked={selectedDocs.includes(
-                                doc.doc_id
-                            )}
-                            onChange={() =>
-                                toggleDoc(
-                                    doc.doc_id
-                                )
-                            }
-                        />
-
-                        {doc.filename}
-                    </label>
-                )
-            )}
-
-            <div className="mt-6">
-                <h2 className="font-semibold mb-2">
-                    Search Mode
-                </h2>
-
-                <div className="flex gap-2">
-                    <button
-                        onClick={() =>
-                            setMode(
-                                "selected"
-                            )
-                        }
-                        className="px-3 py-2 bg-slate-200 rounded"
-                    >
-                        Selected
-                    </button>
-
-                    <button
-                        onClick={() =>
-                            setMode(
-                                "all"
-                            )
-                        }
-                        className="px-3 py-2 bg-slate-200 rounded"
-                    >
-                        All
-                    </button>
-                </div>
-            </div>
 
             <SessionList
                 sessions={sessions}
@@ -115,6 +35,13 @@ export default function Sidebar(
                     setActiveSession
                 }
             />
+
+            <div id="user" className="bottom-0 border-t absolute w-full ">
+                <h2>{user.name}</h2>
+                <button onClick={
+                    onLogout
+                } className="w-[75%] rounded-full px-4 py-2">Logout</button>
+            </div>
         </div>
     );
 }
