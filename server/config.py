@@ -6,7 +6,7 @@ load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-UPLOAD_DIR = "uploads"
+# UPLOAD_DIR = "uploads"
 VECTOR_DB_DIR = "vectorstores/master"
 
 CHUNK_SIZE = 1000
@@ -25,3 +25,9 @@ QDRANT_COLLECTION = os.getenv(
     "QDRANT_COLLECTION",
     "docuquery_docs"
 )
+
+B2_KEY_ID = os.getenv("B2_KEY_ID")
+B2_APPLICATION_KEY = os.getenv("B2_APPLICATION_KEY")
+B2_BUCKET = os.getenv("B2_BUCKET")
+B2_ENDPOINT = os.getenv("B2_ENDPOINT")
+B2_REGION = os.getenv("B2_REGION")

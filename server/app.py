@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from db import Base, engine, get_db
 from models import Document, ChatSession, Message
 from schemas import SessionCreate, AskRequest
-from config import UPLOAD_DIR
+# from config import UPLOAD_DIR
 from ingest import ingest_pdf
 from models import User
 from schemas import (
@@ -20,10 +20,12 @@ from auth import (
     get_current_user
 )
 from graph import graph
+from storage import upload_pdf
+import tempfile
 
 Base.metadata.create_all(bind=engine)
 
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI()
 
@@ -137,32 +139,40 @@ async def upload_file(
 ):
     doc_id = str(uuid.uuid4())
 
-    path = os.path.join(
-        UPLOAD_DIR,
-        f"{doc_id}_{file.filename}"
-    )
+    temp_path = f"temp_{doc_id}.pdf"
 
-    with open(path, "wb") as f:
+    with open(temp_path, "wb") as f:
         f.write(await file.read())
 
+    # upload to B2
+    key = f"user_{user.id}/{doc_id}_{file.filename}"
+    url = upload_pdf(temp_path, key)
+
+    # ingest to qdrant
     ingest_pdf(
-        path,
+        temp_path,
         doc_id,
         file.filename,
         user.id
     )
 
+    # delete temp file
+    os.remove(temp_path)
+
     doc = Document(
         user_id=user.id,
         doc_id=doc_id,
-        filename=file.filename
+        filename=file.filename,
+        file_key=key,
+        file_url=url
     )
 
     db.add(doc)
     db.commit()
 
     return {
-        "message": "Uploaded"
+        "message": "Uploaded",
+        "url": url
     }
 
 # --------------------

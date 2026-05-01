@@ -22,6 +22,9 @@ class Document(Base):
     doc_id = Column(String, unique=True, index=True)
     filename = Column(String)
 
+    file_key = Column(String)      # B2 object path
+    file_url = Column(String)      # public/private URL
+
     uploaded_at = Column(DateTime, default=datetime.utcnow)
 
 
