@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
-import { api } from "../lib/api";
 
-export default function Register(
-    props: any
-) {
-    const {
-        goLogin,
-    } = props;
+import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+
+export default function Register() {
+
+    const navigate = useNavigate()
+    const { registerMutation } = useAuth();
 
     const [name, setName] =
         useState("");
@@ -20,39 +19,13 @@ export default function Register(
         setPassword,
     ] = useState("");
 
-    const submit =
-        async () => {
-            const res =
-                await api.request(
-                    "/register",
-                    {
-                        method:
-                            "POST",
-                        body: JSON.stringify(
-                            {
-                                name,
-                                email,
-                                password,
-                            }
-                        ),
-                    }
-                );
-
-            if (
-                res.detail
-            ) {
-                alert(
-                    res.detail
-                );
-                return;
+    const submit = () => {
+        registerMutation.mutate({ email, password, name }, {
+            onSuccess: () => {
+                navigate("/login")
             }
-
-            alert(
-                "Registered successfully"
-            );
-
-            goLogin();
-        };
+        })
+    }
 
     return (
         <div className="space-y-3">

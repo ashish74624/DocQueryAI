@@ -42,10 +42,11 @@ export const useApi = () => {
 
 
     const post = async <T>(url: string, bodyData: Record<string, any>): Promise<T> => {
+        const snakeBody = snakecaseKeys(bodyData, { deep: true });
         const res = await fetch(`${BASE_URL}/${url}/`, {
             method: "POST",
             headers: getHeaders(url),
-            body: JSON.stringify(bodyData)
+            body: JSON.stringify(snakeBody)
         });
 
         return handleResponse(res);

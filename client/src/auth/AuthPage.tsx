@@ -41,11 +41,6 @@ export default function AuthPage() {
                 ) : (
                     <>
                         <Register
-                            goLogin={() =>
-                                setMode(
-                                    "login"
-                                )
-                            }
                         />
 
                         <p className="text-sm text-center mt-4">

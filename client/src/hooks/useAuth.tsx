@@ -10,10 +10,10 @@ export const useAuth = () => {
             post<LoginResponse>("login", { email, password })
     });
 
-    const signupMutation = useMutation({
+    const registerMutation = useMutation({
         mutationFn: ({ name, email, password }: { name: string, email: string; password: string }) =>
             post("register", { name, email, password }),
     });
 
-    return { loginMutation, signupMutation };
+    return { loginMutation, registerMutation };
 };
