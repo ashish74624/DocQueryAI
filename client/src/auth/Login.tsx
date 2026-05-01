@@ -1,13 +1,18 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
-import { api } from "../lib/api";
 
-export default function Login(
-    props: any
-) {
-    const {
-        onLogin,
-    } = props;
+import { useState } from "react";
+// import { api } from "../lib/api";
+import { useUser } from "../hooks/useUser";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+
+
+export default function Login() {
+
+    const navigate = useNavigate()
+
+    const { getUser } = useUser();
+
+    const { loginMutation } = useAuth();
 
     const [email, setEmail] =
         useState("");
@@ -17,39 +22,15 @@ export default function Login(
         setPassword,
     ] = useState("");
 
-    const submit =
-        async () => {
-            const res =
-                await api.request(
-                    "/login",
-                    {
-                        method:
-                            "POST",
-                        body: JSON.stringify(
-                            {
-                                email,
-                                password,
-                            }
-                        ),
-                    }
-                );
-
-            if (
-                res.detail
-            ) {
-                alert(
-                    res.detail
-                );
-                return;
+    const submit = () => {
+        loginMutation.mutate({ email, password }, {
+            onSuccess: (data) => {
+                localStorage.setItem("token", data.accessToken);
+                getUser.refetch();
+                navigate('/ask')
             }
-
-            localStorage.setItem(
-                "token",
-                res.access_token
-            );
-
-            onLogin();
-        };
+        })
+    }
 
     return (
         <div className="space-y-3">
@@ -78,7 +59,7 @@ export default function Login(
 
             <button
                 onClick={
-                    submit
+                    () => submit()
                 }
                 className="w-full bg-green-600 text-white py-2 rounded"
             >

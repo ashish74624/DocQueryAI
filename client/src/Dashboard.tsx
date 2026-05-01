@@ -13,12 +13,17 @@ import type {
   SessionItem,
 } from "./types";
 import DocumentPanel from "./components/DocumentPanel";
+import { useUser } from "./hooks/useUser";
 
 export default function Dashboard(
   props: any
 ) {
+
+  const { getUser } = useUser();
+
+
+
   const {
-    user,
     onLogout,
   } = props;
   const [documents, setDocuments] =
@@ -53,6 +58,11 @@ export default function Dashboard(
     useState<"chat" | "rag" | "tool">("chat");
 
   console.log("mode ", mode)
+  if (getUser.isLoading || getUser.isPending) {
+    return <>Loading...</>
+  }
+
+  const user = getUser.data;
   return (
     <div className="h-screen flex bg-slate-100">
 
@@ -64,7 +74,7 @@ export default function Dashboard(
         setActiveSession={
           setActiveSession
         }
-        
+
         mode={mode}
         setMode={setMode}
         user={user}
@@ -83,14 +93,14 @@ export default function Dashboard(
         />
       </div>
       <DocumentPanel selectedDocs={
-          selectedDocs
-        }
+        selectedDocs
+      }
         setSelectedDocs={
           setSelectedDocs
-        }  
+        }
         documents={documents}
-      setMode={setMode}
-        />
+        setMode={setMode}
+      />
     </div>
   );
 }

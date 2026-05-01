@@ -20,3 +20,9 @@ export interface SourceItem {
     page: number;
     snippet: string;
 }
+
+export interface LoginResponse {
+    accessToken: string,
+    tokenType: string,
+    name: string
+}

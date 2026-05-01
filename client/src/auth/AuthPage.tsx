@@ -1,15 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useState } from "react";
 
 import Login from "./Login";
 import Register from "./Register";
 
-export default function AuthPage(
-    props: any
-) {
-    const {
-        onLogin,
-    } = props;
+export default function AuthPage() {
+ 
 
     const [mode, setMode] =
         useState(
@@ -26,11 +22,7 @@ export default function AuthPage(
                 {mode ===
                     "login" ? (
                     <>
-                        <Login
-                            onLogin={
-                                onLogin
-                            }
-                        />
+                        <Login />
 
                         <p className="text-sm text-center mt-4">
                             No account?{" "}
