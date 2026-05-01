@@ -18,3 +18,10 @@ TOP_K = 6
 WEATHER_API_KEY=os.getenv("WEATHER_API_KEY")
 
 MODEL_NAME = "llama-3.1-8b-instant"
+
+QDRANT_URL = os.getenv("QDRANT_URL")
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
+QDRANT_COLLECTION = os.getenv(
+    "QDRANT_COLLECTION",
+    "docuquery_docs"
+)

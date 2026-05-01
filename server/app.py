@@ -148,7 +148,8 @@ async def upload_file(
     ingest_pdf(
         path,
         doc_id,
-        file.filename
+        file.filename,
+        user.id
     )
 
     doc = Document(
@@ -275,11 +276,14 @@ def ask(
         f"{m.role}: {m.content}"
         for m in history[-10:]
     ]
+    
 
     result = graph.invoke({
     "question": payload.question,
     "mode": payload.mode,
     "selected_docs": payload.selected_docs,
+    "user_id": user.id,
+
 
     "docs": [],
     "answer": "",

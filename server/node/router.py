@@ -3,11 +3,11 @@ from llm import route_question
 
 
 def router_node(state):
-    # try retrieval first
     docs = retrieve_docs(
         state["question"],
         state["mode"],
-        state["selected_docs"]
+        state["selected_docs"],
+        state["user_id"]
     )
 
     if docs and len(docs) > 0:
@@ -16,7 +16,6 @@ def router_node(state):
             "docs": docs
         }
 
-    # fallback to model router
     route = route_question(
         state["question"]
     )
