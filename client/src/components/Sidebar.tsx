@@ -24,7 +24,7 @@ export default function Sidebar(
             />
 
             <div id="user" className="bottom-0 border-t absolute w-full ">
-                <h2>{user.name}</h2>
+                <h2>{user?.name}</h2>
                 <button onClick={onLogout}
                     className="w-[75%] rounded-full px-4 py-2">
                     Logout

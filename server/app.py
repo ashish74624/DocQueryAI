@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from db import Base, engine, get_db
 from models import Document, ChatSession, Message
 from schemas import SessionCreate, AskRequest
-# from config import UPLOAD_DIR
+from datetime import datetime
 from ingest import ingest_pdf
 from models import User
 from schemas import (
@@ -218,7 +218,7 @@ def get_sessions(
 ):
     sessions = db.query(ChatSession).filter(
         ChatSession.user_id == user.id
-    ).all()
+    ).order_by(ChatSession.updated_at.desc()).all()
 
     return sessions
 
@@ -310,6 +310,7 @@ def ask(
         content=result["answer"]
     )
 
+    session.updated_at = datetime.utcnow()
     db.add(bot_msg)
     db.commit()
 

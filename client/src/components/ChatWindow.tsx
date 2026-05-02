@@ -2,12 +2,13 @@
 import { useState } from "react";
 import MessageBubble from "./MessageBubble";
 import { useChat } from "../hooks/useChat";
+import type { Source } from "../types";
 
 export default function ChatWindow(props: any) {
     const { activeSession, selectedDocs, mode } = props;
 
     const [question, setQuestion] = useState("");
-    const [sources, setSources] = useState<any[]>([]);
+    const [sources, setSources] = useState<Source[]>([]);
 
     const { messagesQuery, askMutation } = useChat(
         activeSession?.id || null

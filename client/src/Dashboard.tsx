@@ -1,22 +1,24 @@
-import { useState } from "react";
+import {  useState } from "react";
 import { useDashboard } from "./hooks/useDashboard";
 import { useUser } from "./hooks/useUser";
 import Sidebar from "./components/Sidebar";
 import { logOut } from "./lib/logout";
 import ChatWindow from "./components/ChatWindow";
 import DocumentPanel from "./components/DocumentPanel";
+import type { ChatSession } from "./types";
 
 export default function Dashboard() {
   const { getUser } = useUser();
   const {
     documentsQuery,
     sessionsQuery,
+    // createSessionMutation
   } = useDashboard();
 
   const documents = documentsQuery.data || [];
   const sessions = sessionsQuery.data || [];
 
-  const [activeSession, setActiveSession] = useState(null);
+  const [activeSession, setActiveSession] = useState<ChatSession | null>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [mode, setMode] = useState<"chat" | "rag" | "tool">("chat");
 
@@ -30,8 +32,9 @@ export default function Dashboard() {
 
   const user = getUser.data;
 
-  console.log("mode ",mode)
-  console.log("selectedDocs ", selectedDocs)
+  console.log("mode ", mode)
+  console.log("selectedDocs ", selectedDocs);
+
 
   return (
     <div className="h-screen flex bg-slate-100">

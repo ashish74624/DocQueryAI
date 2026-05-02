@@ -27,7 +27,7 @@ export interface LoginResponse {
     name: string
 }
 
-interface Source {
+export interface Source {
     filename: string,
     page: number,
     snippet: string
@@ -58,4 +58,12 @@ export interface SessionItem {
     createdAt: string,
     id: number,
     content: string
+}
+
+export interface ChatSession {
+    id: number,
+    user_id: string
+    title: string,
+    created_at: string,
+    updated_at: string
 }
