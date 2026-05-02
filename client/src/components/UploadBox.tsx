@@ -1,30 +1,22 @@
+import { useUpload } from "../hooks/useUpload";
 
-import { uploadFile } from "../lib/api";
+export default function UploadBox() {
+    const uploadMutation = useUpload();
 
-export default function UploadBox(
-   
-) {
-    const handleUpload =
-        async (
-            e: React.ChangeEvent<HTMLInputElement>
-        ) => {
-            const file =
-                e.target.files?.[0];
+    const handleUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-            if (!file) return;
-
-            await uploadFile(file);
-
-            window.location.reload();
-        };
+        uploadMutation.mutate(file);
+    };
 
     return (
         <input
             type="file"
             accept=".pdf"
-            onChange={
-                handleUpload
-            }
+            onChange={handleUpload}
             className="w-full"
         />
     );

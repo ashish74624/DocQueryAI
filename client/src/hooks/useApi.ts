@@ -65,6 +65,23 @@ export const useApi = () => {
         return handleResponse(res);
     };
 
+    const postForm = async <T>(
+        url: string,
+        formData: FormData
+    ): Promise<T> => {
+        const token = localStorage.getItem("token");
 
-    return { get, post, put }
+        const res = await fetch(`${BASE_URL}/${url}/`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+        });
+
+        return handleResponse(res);
+    };
+
+
+    return { get, post, put, postForm }
 } 

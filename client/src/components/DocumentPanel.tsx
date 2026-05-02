@@ -10,6 +10,10 @@ export default function DocumentPanel(props: any) {
         setSelectedDocs,///
         setMode
     } = props;
+
+    console.log("selectedDocs in Document Panel  ", selectedDocs)
+    console.log("documents in Document Panel  ", documents)
+
     const toggleDoc = (
         id: string
     ) => {
@@ -49,11 +53,11 @@ export default function DocumentPanel(props: any) {
                         <input
                             type="checkbox"
                             checked={selectedDocs.includes(
-                                doc.doc_id
+                                doc.docId
                             )}
                             onChange={() =>
                                 toggleDoc(
-                                    doc.doc_id
+                                    doc.docId
                                 )
                             }
                         />

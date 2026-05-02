@@ -1,103 +1,60 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
-import Sidebar from "./components/Sidebar";
-import ChatWindow from "./components/ChatWindow";
-
-import {
-  getDocuments,
-  getSessions,
-} from "./lib/api";
-
-import type {
-  DocumentItem,
-  SessionItem,
-} from "./types";
-import DocumentPanel from "./components/DocumentPanel";
+import { useState } from "react";
+import { useDashboard } from "./hooks/useDashboard";
 import { useUser } from "./hooks/useUser";
+import Sidebar from "./components/Sidebar";
+import { logOut } from "./lib/logout";
+import ChatWindow from "./components/ChatWindow";
+import DocumentPanel from "./components/DocumentPanel";
 
-export default function Dashboard(
-  props: any
-) {
-
+export default function Dashboard() {
   const { getUser } = useUser();
-
-
-
   const {
-    onLogout,
-  } = props;
-  const [documents, setDocuments] =
-    useState<DocumentItem[]>([]);
+    documentsQuery,
+    sessionsQuery,
+  } = useDashboard();
 
-  const [sessions, setSessions] =
-    useState<SessionItem[]>([]);
+  const documents = documentsQuery.data || [];
+  const sessions = sessionsQuery.data || [];
 
-  const [activeSession, setActiveSession] =
-    useState<SessionItem | null>(null);
+  const [activeSession, setActiveSession] = useState(null);
+  const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
+  const [mode, setMode] = useState<"chat" | "rag" | "tool">("chat");
 
-
-
-  const [selectedDocs, setSelectedDocs] =
-    useState<string[]>([]);
-
-  useEffect(() => {
-    const loadData = async () => {
-      const docs =
-        await getDocuments();
-
-      const sess =
-        await getSessions();
-
-      setDocuments(docs);
-      setSessions(sess);
-    };
-    loadData();
-  }, []);
-
-  const [mode, setMode] =
-    useState<"chat" | "rag" | "tool">("chat");
-
-  console.log("mode ", mode)
-  if (getUser.isLoading || getUser.isPending) {
-    return <>Loading...</>
+  if (
+    getUser.isLoading ||
+    documentsQuery.isLoading ||
+    sessionsQuery.isLoading
+  ) {
+    return <>Loading...</>;
   }
 
   const user = getUser.data;
+
+  console.log("mode ",mode)
+  console.log("selectedDocs ", selectedDocs)
+
   return (
     <div className="h-screen flex bg-slate-100">
-
       <Sidebar
-        setDocuments={setDocuments}
         sessions={sessions}
-        setSessions={setSessions}
         activeSession={activeSession}
-        setActiveSession={
-          setActiveSession
-        }
-
-        mode={mode}
-        setMode={setMode}
+        setActiveSession={setActiveSession}
         user={user}
-        onLogout={onLogout}
+        onLogout={logOut}
+        setMode={setMode}
       />
-      <div className="flex-1 flex flex-col">
 
+      <div className="flex-1 flex flex-col">
         <ChatWindow
-          activeSession={
-            activeSession
-          }
-          selectedDocs={
-            selectedDocs
-          }
+          activeSession={activeSession}
+          selectedDocs={selectedDocs}
           mode={mode}
         />
       </div>
-      <DocumentPanel selectedDocs={
-        selectedDocs
-      }
-        setSelectedDocs={
-          setSelectedDocs
-        }
+
+      <DocumentPanel
+        selectedDocs={selectedDocs}
+        setSelectedDocs={setSelectedDocs}
         documents={documents}
         setMode={setMode}
       />

@@ -1,38 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSession } from "../lib/api";
+import { useDashboard } from "../hooks/useDashboard";
 
 export default function SessionList(
     props: any
 ) {
     const {
         sessions,
-        setSessions,
         activeSession,
         setActiveSession,
     } = props;
 
-    const newChat =
-        async () => {
-            const title =
-                prompt(
-                    "Session title?"
-                ) || "New Chat";
 
-            const session =
-                await createSession(
-                    title
-                );
+    const { createSessionMutation } = useDashboard();
 
-            setSessions([
-                session,
-                ...sessions,
-            ]);
+    const newChat = async () => {
+        const title = prompt("Session title?") || "New Chat";
 
-            setActiveSession(
-                session
-            );
-        };
+        const session = await createSessionMutation.mutateAsync(title);
 
+        setActiveSession(session);
+    };
     return (
         <div className="mt-8 p-4 ">
             <div className="flex justify-between items-center mb-2">
@@ -58,9 +45,9 @@ export default function SessionList(
                             )
                         }
                         className={`block w-full text-left px-3 py-2 rounded mb-1 ${activeSession?.id ===
-                                s.id
-                                ? "bg-blue-600 text-white"
-                                : "bg-slate-100"
+                            s.id
+                            ? "bg-blue-600 text-white"
+                            : "bg-slate-100"
                             }`}
                     >
                         {s.title}
