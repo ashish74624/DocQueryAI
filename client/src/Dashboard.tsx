@@ -1,4 +1,4 @@
-import {  useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDashboard } from "./hooks/useDashboard";
 import { useUser } from "./hooks/useUser";
 import Sidebar from "./components/Sidebar";
@@ -12,13 +12,45 @@ export default function Dashboard() {
   const {
     documentsQuery,
     sessionsQuery,
-    // createSessionMutation
+    createSessionMutation
   } = useDashboard();
 
-  const documents = documentsQuery.data || [];
   const sessions = sessionsQuery.data || [];
-
   const [activeSession, setActiveSession] = useState<ChatSession | null>(null);
+
+  const didAutoInit = useRef(false);
+  useEffect(() => {
+    if (didAutoInit.current) return;
+    if (sessionsQuery.isLoading || sessionsQuery.isError) return;
+    // if user already picked something, don't override
+    if (activeSession) {
+      didAutoInit.current = true;
+      return;
+    }
+    const sessions = sessionsQuery.data; // may be undefined
+    // StrictMode-safe: lock immediately
+    didAutoInit.current = true;
+    (async () => {
+      if (sessions && sessions.length > 0) {
+        setActiveSession(sessions[0]);
+        return;
+      }
+      const created = await createSessionMutation.mutateAsync("New Chat");
+      setActiveSession(created);
+    })();
+  }, [
+    activeSession,
+    sessionsQuery.isLoading,
+    sessionsQuery.isError,
+    sessionsQuery.data,          // key: depend on data reference, not `|| []`
+    createSessionMutation,
+  ]);
+
+
+
+
+  const documents = documentsQuery.data || [];
+
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [mode, setMode] = useState<"chat" | "rag" | "tool">("chat");
 

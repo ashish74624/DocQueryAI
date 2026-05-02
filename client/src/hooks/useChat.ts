@@ -1,9 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "./useApi";
 import type { AskRequest, AskResponse, SessionItem } from "../types";
+import { useDashboard } from "./useDashboard";
 
 export const useChat = (sessionId: number | null) => {
     const { get, post } = useApi();
+    const { sessionsQuery } = useDashboard();
+
     const queryClient = useQueryClient();
 
     // -------------------------
@@ -23,6 +26,7 @@ export const useChat = (sessionId: number | null) => {
             post<AskResponse>("ask", payload),
 
         onSuccess: () => {
+            sessionsQuery.refetch();
             queryClient.invalidateQueries({
                 queryKey: ["messages", sessionId],
             });
