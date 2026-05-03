@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from datetime import datetime
 from db import Base
-
+from sqlalchemy.orm import relationship
 
 class User(Base):
     __tablename__ = "users"
@@ -38,15 +38,24 @@ class ChatSession(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    messages = relationship(
+        "Message",
+        back_populates="session",
+        cascade="all, delete"
+    )
+
 
 class Message(Base):
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, index=True)
-
     session_id = Column(Integer, ForeignKey("sessions.id"))
 
     role = Column(String)
     content = Column(Text)
-
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    session = relationship(
+        "ChatSession",
+        back_populates="messages"
+    )

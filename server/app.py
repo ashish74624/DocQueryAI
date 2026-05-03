@@ -11,7 +11,8 @@ from ingest import ingest_pdf
 from models import User
 from schemas import (
     RegisterSchema,
-    LoginSchema
+    LoginSchema,
+    SessionRename
 )
 from auth import (
     hash_password,
@@ -21,7 +22,7 @@ from auth import (
 )
 from graph import graph
 from storage import upload_pdf
-import tempfile
+from llm import generate_session_title
 
 Base.metadata.create_all(bind=engine)
 
@@ -248,6 +249,55 @@ def get_messages(
 
     return msgs
 
+@app.put("/sessions/{session_id}")
+def rename_session(
+    session_id: int,
+    payload: SessionCreate,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
+):
+    session = db.query(ChatSession).filter(
+        ChatSession.id == session_id,
+        ChatSession.user_id == user.id
+    ).first()
+
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session.title = payload.title
+    db.commit()
+
+    return session
+
+@app.put("/sessions/{session_id}")
+def rename_session(
+    session_id: int,
+    payload: SessionRename,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
+):
+    session = db.query(ChatSession).filter(
+        ChatSession.id == session_id,
+        ChatSession.user_id == user.id
+    ).first()
+
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    title = payload.title.strip()
+
+    if not title:
+        raise HTTPException(status_code=400, detail="Title cannot be empty")
+
+    if len(title) > 100:
+        raise HTTPException(status_code=400, detail="Title too long")
+
+    session.title = title
+
+    db.commit()
+    db.refresh(session)
+
+    return session
 
 # --------------------
 # Ask
@@ -278,6 +328,14 @@ def ask(
     db.add(user_msg)
     db.commit()
 
+    DEFAULT_TITLE = "New Chat"
+    # ONLY set title if it's empty or default
+    if session.title in [None, "", DEFAULT_TITLE]:
+        title = generate_session_title(payload.question)
+
+        session.title = title
+        db.commit()
+
     history = db.query(Message).filter(
         Message.session_id == payload.session_id
     ).order_by(Message.id.asc()).all()
@@ -289,20 +347,20 @@ def ask(
     
 
     result = graph.invoke({
-    "question": payload.question,
-    "mode": payload.mode,
-    "selected_docs": payload.selected_docs,
-    "user_id": user.id,
+        "question": payload.question,
+        "mode": payload.mode,
+        "selected_docs": payload.selected_docs,
+        "user_id": user.id,
 
 
-    "docs": [],
-    "answer": "",
-    "route": "",
-    "sources": [],
-    "meta": {},
+        "docs": [],
+        "answer": "",
+        "route": "",
+        "sources": [],
+        "meta": {},
 
-    "memory": memory
-})
+        "memory": memory
+    })
 
     bot_msg = Message(
         session_id=payload.session_id,

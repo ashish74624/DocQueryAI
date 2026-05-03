@@ -39,13 +39,9 @@ export default function SessionList(
                 (s: any) => (
                     <button
                         key={s.id}
-                        onClick={() =>
-                            setActiveSession(
-                                s
-                            )
-                        }
-                        className={`block w-full text-left px-3 py-2 rounded mb-1 ${activeSession?.id ===
-                            s.id
+                        title={s.title}
+                        onClick={() => setActiveSession(s)}
+                        className={`block w-full text-left px-3 py-2 rounded mb-1 truncate ${activeSession?.id === s.id
                             ? "bg-blue-600 text-white"
                             : "bg-slate-100"
                             }`}
