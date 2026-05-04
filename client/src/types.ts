@@ -69,3 +69,21 @@ export interface ChatSession {
     created_at: string;
     updated_at: string;
 }
+
+export const MODE = {
+    CHAT: "chat",
+    RAG: "rag",
+    TOOL: "tool",
+} as const;
+
+export type Mode = (typeof MODE)[keyof typeof MODE];
+
+export interface DocumentItem {
+    id: number;
+    filename: string;
+    fileUrl: string;
+    fileKey: string;
+    userId: number;
+    docId: string;
+    uploadedAt: string;
+}

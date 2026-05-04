@@ -1,5 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export default function MessageBubble(props: any) {
+interface MessageBubbleProps{
+    role:string;
+    text:string;
+}
+
+export default function MessageBubble(props: MessageBubbleProps) {
     const { role, text } = props;
     const isUser = role === "user";
 

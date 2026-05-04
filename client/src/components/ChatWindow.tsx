@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
 import { useChat } from "../hooks/useChat";
-import type { Source } from "../types";
+import type { ChatSession, Mode, Source } from "../types";
 
 const MODE_LABELS: Record<string, { label: string; icon: string; desc: string }> = {
     chat: { label: "Chat", icon: "💬", desc: "General conversation" },
@@ -10,7 +9,15 @@ const MODE_LABELS: Record<string, { label: string; icon: string; desc: string }>
     tool: { label: "Tools", icon: "🔧", desc: "Use available tools" },
 };
 
-export default function ChatWindow(props: any) {
+interface ChatWindowProps {
+    activeSession: ChatSession | null;
+    selectedDocs: string[];
+    mode:Mode;
+    docPanelOpen: boolean;
+    setDocPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function ChatWindow(props: ChatWindowProps) {
     const { activeSession, selectedDocs, mode, docPanelOpen, setDocPanelOpen } = props;
 
     const [question, setQuestion] = useState("");
@@ -90,8 +97,8 @@ export default function ChatWindow(props: any) {
                 <button
                     onClick={() => setDocPanelOpen(!docPanelOpen)}
                     className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${docPanelOpen
-                            ? "bg-[#c9a96e]/15 text-[#c9a96e] border border-[#c9a96e]/30"
-                            : "text-[#8a8578] hover:text-[#e8e3d8] hover:bg-[#2e2c27] border border-transparent"
+                        ? "bg-[#c9a96e]/15 text-[#c9a96e] border border-[#c9a96e]/30"
+                        : "text-[#8a8578] hover:text-[#e8e3d8] hover:bg-[#2e2c27] border border-transparent"
                         }`}
                 >
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -218,7 +225,7 @@ export default function ChatWindow(props: any) {
                         </div>
                     )}
 
-                    {messages.map((m: any) => (
+                    {messages.map((m) => (
                         <MessageBubble key={m.id} role={m.role} text={m.content} />
                     ))}
 

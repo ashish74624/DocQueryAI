@@ -1,15 +1,24 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { User } from "../hooks/useUser";
+import { useUtils } from "../hooks/useUtils";
+import type { ChatSession } from "../types";
 import SessionList from "./SessionList";
 
-export default function Sidebar(props: any) {
+interface SidebarProps{
+    sessions: ChatSession[];
+    activeSession: ChatSession | null;
+    setActiveSession: React.Dispatch<React.SetStateAction<ChatSession | null>>;
+    user: User | undefined;
+}
+
+export default function Sidebar(props: SidebarProps) {
     const {
         sessions,
         activeSession,
         setActiveSession,
-        user,
-        onLogout,
-        setMode,
+        user
     } = props;
+
+    const { logOut } = useUtils()
 
     return (
         <div className="w-65 shrink-0 flex flex-col bg-[#141410] border-r border-[#2e2c27] overflow-hidden">
@@ -31,7 +40,6 @@ export default function Sidebar(props: any) {
                     sessions={sessions}
                     activeSession={activeSession}
                     setActiveSession={setActiveSession}
-                    setMode={setMode}
                 />
             </div>
 
@@ -47,7 +55,7 @@ export default function Sidebar(props: any) {
                             {user?.name ?? "User"}
                         </p>
                         <button
-                            onClick={onLogout}
+                            onClick={logOut}
                             className="text-xs text-[#8a8578] hover:text-[#c9a96e] transition-colors duration-150 leading-tight"
                         >
                             Sign out

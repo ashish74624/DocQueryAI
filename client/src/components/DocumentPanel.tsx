@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Mode } from "../types";
+import type { DocumentItem } from "../types";
 import UploadBox from "./UploadBox";
 
 const MODES = [
@@ -7,7 +8,16 @@ const MODES = [
     { key: "tool", icon: "🔧", label: "Tools", desc: "Use tools" },
 ] as const;
 
-export default function DocumentPanel(props: any) {
+interface DocumentPanelProps{
+    selectedDocs: string[];
+    setSelectedDocs: React.Dispatch<React.SetStateAction<string[]>>;
+    setMode: React.Dispatch<React.SetStateAction<Mode>>;
+    mode: Mode;
+    onClose: () => void;
+    documents: DocumentItem[];
+}
+
+export default function DocumentPanel(props: DocumentPanelProps) {
     const { documents, selectedDocs, setSelectedDocs, setMode, mode, onClose } = props;
 
     const toggleDoc = (id: string) => {
@@ -19,7 +29,7 @@ export default function DocumentPanel(props: any) {
     };
 
     const selectAll = () => {
-        const allIds = documents.map((d: any) => d.docId);
+        const allIds = documents.map((d) => d.docId);
         setSelectedDocs(allIds);
     };
 
@@ -93,7 +103,7 @@ export default function DocumentPanel(props: any) {
                         </div>
 
                         <div className="space-y-0.5">
-                            {documents.map((doc: any) => {
+                            {documents.map((doc) => {
                                 const checked = selectedDocs.includes(doc.docId);
                                 return (
                                     <label

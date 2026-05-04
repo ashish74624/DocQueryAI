@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useDashboard } from "./hooks/useDashboard";
 import { useUser } from "./hooks/useUser";
 import Sidebar from "./components/Sidebar";
-import { logOut } from "./lib/logout";
 import ChatWindow from "./components/ChatWindow";
 import DocumentPanel from "./components/DocumentPanel";
-import type { ChatSession } from "./types";
+import { MODE, type ChatSession, type Mode } from "./types";
 
 export default function Dashboard() {
   const { getUser } = useUser();
@@ -47,7 +46,7 @@ export default function Dashboard() {
 
   const documents = documentsQuery.data || [];
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
-  const [mode, setMode] = useState<"chat" | "rag" | "tool">("chat");
+  const [mode, setMode] = useState<Mode>(MODE.CHAT);
 
   if (
     getUser.isLoading ||
@@ -73,8 +72,6 @@ export default function Dashboard() {
         activeSession={activeSession}
         setActiveSession={setActiveSession}
         user={user}
-        onLogout={logOut}
-        setMode={setMode}
       />
 
       <div className="flex-1 flex overflow-hidden min-w-0">

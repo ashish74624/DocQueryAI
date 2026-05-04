@@ -1,7 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useDashboard } from "../hooks/useDashboard";
+import type { ChatSession } from "../types";
 
-export default function SessionList(props: any) {
+interface SessionListProps {
+    sessions: ChatSession[];
+    activeSession: ChatSession | null;
+    setActiveSession: React.Dispatch<React.SetStateAction<ChatSession | null>>
+}
+
+export default function SessionList(props: SessionListProps) {
     const { sessions, activeSession, setActiveSession } = props;
     const { createSessionMutation } = useDashboard();
 
@@ -32,7 +38,7 @@ export default function SessionList(props: any) {
 
             {/* Session list */}
             <div className="space-y-0.5">
-                {sessions.map((s: any) => {
+                {sessions.map((s) => {
                     const isActive = activeSession?.id === s.id;
                     return (
                         <button
@@ -40,8 +46,8 @@ export default function SessionList(props: any) {
                             title={s.title}
                             onClick={() => setActiveSession(s)}
                             className={`w-full text-left px-3 py-2 rounded-lg text-sm truncate transition-all duration-150 ${isActive
-                                    ? "bg-[#2e2c27] text-[#e8e3d8] font-medium"
-                                    : "text-[#8a8578] hover:bg-[#1e1c18] hover:text-[#c8c3b8]"
+                                ? "bg-[#2e2c27] text-[#e8e3d8] font-medium"
+                                : "text-[#8a8578] hover:bg-[#1e1c18] hover:text-[#c8c3b8]"
                                 }`}
                         >
                             <span className="truncate block">{s.title}</span>

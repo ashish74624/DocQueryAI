@@ -67,7 +67,6 @@ export const useApi = () => {
         return handleResponse(res);
     };
 
-    // ── NEW: for endpoints that return a binary file (PDF etc.) ─────────────
     const postBlob = async (
         url: string,
         bodyData: Record<string, any>
