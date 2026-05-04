@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from db import Base, engine
 from routes import auth, users, documents, sessions, chat, tools
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
