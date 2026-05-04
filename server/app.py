@@ -129,9 +129,7 @@ def me(
         "email": user.email
     }
 
-# --------------------
-# Upload PDF
-# --------------------
+
 @app.post("/upload")
 async def upload_file(
     file: UploadFile = File(...),
@@ -176,9 +174,6 @@ async def upload_file(
         "url": url
     }
 
-# --------------------
-# Documents
-# --------------------
 @app.get("/documents")
 def get_documents(
     db: Session = Depends(get_db),
@@ -191,9 +186,6 @@ def get_documents(
     return docs
 
 
-# --------------------
-# Sessions
-# --------------------
 @app.post("/sessions")
 def create_session(
     payload: SessionCreate,

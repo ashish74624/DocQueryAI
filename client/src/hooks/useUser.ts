@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getToken } from "../lib/api";
 import { useApi } from "./useApi";
 
 export type User = {
@@ -9,6 +8,9 @@ export type User = {
     name: string;
 };
 
+export function getToken() {
+    return localStorage.getItem("token");
+}
 
 export const useUser = () => {
     const removeToken = () => {
