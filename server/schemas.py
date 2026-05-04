@@ -10,6 +10,7 @@ class AskRequest(BaseModel):
     question: str
     mode: str   # chat | rag | tool
     selected_docs: list[str]
+    tool_name: str | None = None 
 
 
 

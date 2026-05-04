@@ -223,9 +223,7 @@ def get_sessions(
 
     return sessions
 
-# --------------------
-# Messages by session
-# --------------------
+
 @app.get("/sessions/{session_id}/messages")
 def get_messages(
     session_id: int,
@@ -299,81 +297,116 @@ def rename_session(
 
     return session
 
-# --------------------
-# Ask
-# --------------------
-@app.post("/ask")
-def ask(
-    payload: AskRequest,
-    db: Session = Depends(get_db),
-    user = Depends(get_current_user)
+from fastapi import FastAPI, Depends, HTTPException, Body
+from fastapi.responses import Response
+from datetime import datetime
+
+@app.post("/report")
+async def generate_report(
+    topic: str = Body(..., embed=True),
+    session_id: int = Body(..., embed=True),
+    user=Depends(get_current_user),
 ):
-    session = db.query(ChatSession).filter(
-        ChatSession.id == payload.session_id,
-        ChatSession.user_id == user.id
-    ).first()
-
-    if not session:
-        raise HTTPException(
-            status_code=404,
-            detail="Session not found"
-        )
-
-    user_msg = Message(
-        session_id=payload.session_id,
-        role="user",
-        content=payload.question
-    )
-
-    db.add(user_msg)
-    db.commit()
-
-    DEFAULT_TITLE = "New Chat"
-    # ONLY set title if it's empty or default
-    if session.title in [None, "", DEFAULT_TITLE]:
-        title = generate_session_title(payload.question)
-
-        session.title = title
-        db.commit()
-
-    history = db.query(Message).filter(
-        Message.session_id == payload.session_id
-    ).order_by(Message.id.asc()).all()
-
-    memory = [
-        f"{m.role}: {m.content}"
-        for m in history[-10:]
-    ]
-    
-
-    result = graph.invoke({
-        "question": payload.question,
-        "mode": payload.mode,
-        "selected_docs": payload.selected_docs,
+    """
+    Runs the graph in tool mode with tool_name='research_report'.
+    Returns the PDF as a file download.
+    """
+    state = {
+        "question": topic,
+        "mode": "tool",
+        "tool_name": "research_report",
+        "selected_docs": [],
         "user_id": user.id,
-
-
         "docs": [],
         "answer": "",
         "route": "",
         "sources": [],
         "meta": {},
+        "memory": [],
+        "report_pdf": None,
+    }
 
-        "memory": memory
+    result = graph.invoke(state)
+
+    pdf_bytes = result.get("report_pdf")
+    if not pdf_bytes:
+        raise HTTPException(status_code=500, detail="Report generation failed.")
+
+    safe_topic = topic[:40].replace(" ", "_").replace("/", "-")
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="report_{safe_topic}.pdf"'
+        },
+    )
+
+ 
+@app.post("/ask")
+def ask(
+    payload: AskRequest,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    session = db.query(ChatSession).filter(
+        ChatSession.id == payload.session_id,
+        ChatSession.user_id == user.id,
+    ).first()
+ 
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+ 
+    user_msg = Message(
+        session_id=payload.session_id,
+        role="user",
+        content=payload.question,
+    )
+    db.add(user_msg)
+    db.commit()
+ 
+    DEFAULT_TITLE = "New Chat"
+    if session.title in [None, "", DEFAULT_TITLE]:
+        title = generate_session_title(payload.question)
+        session.title = title
+        db.commit()
+ 
+    history = (
+        db.query(Message)
+        .filter(Message.session_id == payload.session_id)
+        .order_by(Message.id.asc())
+        .all()
+    )
+    memory = [f"{m.role}: {m.content}" for m in history[-10:]]
+ 
+    result = graph.invoke({
+        "question": payload.question,
+        "mode": payload.mode,
+        "selected_docs": payload.selected_docs,
+        "user_id": user.id,
+        "tool_name": payload.tool_name or "",   # ← added
+        "docs": [],
+        "answer": "",
+        "route": "",
+        "sources": [],
+        "meta": {},
+        "memory": memory,
+        "report_pdf": None,                     # ← added
     })
-
+ 
     bot_msg = Message(
         session_id=payload.session_id,
         role="assistant",
-        content=result["answer"]
+        content=result["answer"],
     )
-
     session.updated_at = datetime.utcnow()
     db.add(bot_msg)
     db.commit()
-
+ 
     return {
         "answer": result["answer"],
         "sources": result["sources"],
-        "meta": result["meta"]
+        "meta": result["meta"],
     }
+ 
+ 

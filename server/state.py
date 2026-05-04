@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Any
+from typing import TypedDict, List, Any, Optional
 
 
 class GraphState(TypedDict):
@@ -12,5 +12,10 @@ class GraphState(TypedDict):
 
     sources: list
     meta: dict
-
     memory: list
+
+    # Tool dispatch
+    tool_name: Optional[str]       # e.g. "weather" | "research_report"
+
+    # Populated by research_report tool only
+    report_pdf: Optional[bytes]

@@ -7,6 +7,10 @@ export interface DocumentItem {
 export interface SessionItem {
     id: number;
     title: string;
+    sessionId: number;
+    role: string;
+    createdAt: string;
+    content: string;
 }
 
 export interface MessageItem {
@@ -22,48 +26,46 @@ export interface SourceItem {
 }
 
 export interface LoginResponse {
-    accessToken: string,
-    tokenType: string,
-    name: string
+    accessToken: string;
+    tokenType: string;
+    name: string;
 }
 
 export interface Source {
-    filename: string,
-    page: number,
-    snippet: string
+    filename: string;
+    page: number;
+    snippet: string;
 }
 
 interface Meta {
-    usedDocs: boolean,
-    usedModelKnowledge: boolean,
-    toolsUsed: string[]
+    usedDocs: boolean;
+    usedModelKnowledge: boolean;
+    toolsUsed: string[];
 }
 
 export interface AskResponse {
-    answer: string,
-    sources: Source[],
-    meta: Meta
+    answer: string;
+    sources: Source[];
+    meta: Meta;
 }
 
 export interface AskRequest {
-    sessionId: number,
-    mode: string,
-    question: string,
-    selected_docs: string[]
+    sessionId: number;
+    mode: string;
+    question: string;
+    selected_docs: string[];
+    tool_name?: string;         // "weather" | "research_report" | undefined
 }
 
-export interface SessionItem {
-    sessionId: number,
-    role: string,
-    createdAt: string,
-    id: number,
-    content: string
+export interface ReportRequest {
+    topic: string;
+    sessionId: number;
 }
 
 export interface ChatSession {
-    id: number,
-    user_id: string
-    title: string,
-    created_at: string,
-    updated_at: string
+    id: number;
+    user_id: string;
+    title: string;
+    created_at: string;
+    updated_at: string;
 }

@@ -31,3 +31,6 @@ B2_APPLICATION_KEY = os.getenv("B2_APPLICATION_KEY")
 B2_BUCKET = os.getenv("B2_BUCKET")
 B2_ENDPOINT = os.getenv("B2_ENDPOINT")
 B2_REGION = os.getenv("B2_REGION")
+
+
+TAVILY_API_KEY=os.getenv("TAVILY_API_KEY")
