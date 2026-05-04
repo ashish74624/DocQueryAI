@@ -1,123 +1,99 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useDashboard } from "./hooks/useDashboard";
+import { useUser } from "./hooks/useUser";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
+import DocumentPanel from "./components/DocumentPanel";
+import { MODE, type ChatSession, type Mode } from "./types";
 
-import {
-  getDocuments,
-  getSessions,
-} from "./lib/api";
-
-import type {
-  DocumentItem,
-  SessionItem,
-} from "./types";
-
-export default function Dashboard(
-  props: any
-) {
+export default function Dashboard() {
+  const { getUser } = useUser();
   const {
-    user,
-    onLogout,
-  } = props;
-  const [documents, setDocuments] =
-    useState<DocumentItem[]>([]);
+    documentsQuery,
+    sessionsQuery,
+    createSessionMutation
+  } = useDashboard();
 
-  const [sessions, setSessions] =
-    useState<SessionItem[]>([]);
+  const sessions = sessionsQuery.data || [];
+  const [activeSession, setActiveSession] = useState<ChatSession | null>(null);
+  const [docPanelOpen, setDocPanelOpen] = useState(true);
 
-  const [activeSession, setActiveSession] =
-    useState<SessionItem | null>(null);
-
-
-
-  const [selectedDocs, setSelectedDocs] =
-    useState<string[]>([]);
-
+  const didAutoInit = useRef(false);
   useEffect(() => {
-    const loadData = async () => {
-      const docs =
-        await getDocuments();
+    if (didAutoInit.current) return;
+    if (sessionsQuery.isLoading || sessionsQuery.isError) return;
+    if (activeSession) {
+      didAutoInit.current = true;
+      return;
+    }
+    const sessions = sessionsQuery.data;
+    didAutoInit.current = true;
+    (async () => {
+      if (sessions && sessions.length > 0) {
+        setActiveSession(sessions[0]);
+        return;
+      }
+      const created = await createSessionMutation.mutateAsync("New Chat");
+      setActiveSession(created);
+    })();
+  }, [
+    activeSession,
+    sessionsQuery.isLoading,
+    sessionsQuery.isError,
+    sessionsQuery.data,
+    createSessionMutation,
+  ]);
 
-      const sess =
-        await getSessions();
+  const documents = documentsQuery.data || [];
+  const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
+  const [mode, setMode] = useState<Mode>(MODE.CHAT);
 
-      setDocuments(docs);
-      setSessions(sess);
-    };
-    loadData();
-  }, []);
-
-  const [mode, setMode] =
-    useState<"chat" | "rag" | "tool">("chat");
-
-  console.log("mode ",mode)
-  return (
-    <div className="h-screen flex bg-slate-100">
-
-      <Sidebar
-        documents={documents}
-        setDocuments={setDocuments}
-        sessions={sessions}
-        setSessions={setSessions}
-        activeSession={activeSession}
-        setActiveSession={
-          setActiveSession
-        }
-        selectedDocs={
-          selectedDocs
-        }
-        setSelectedDocs={
-          setSelectedDocs
-        }
-        mode={mode}
-        setMode={setMode}
-      />
-      <div className="flex-1 flex flex-col"> 
-
-        <div>
-
-          <div className="bg-white h-16 border-b p-4 flex justify-between">
-            <div>
-              Welcome, {user.name}
-            </div>
-
-            <button
-              onClick={
-                onLogout
-              }
-              className="bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Logout
-            </button>
-          </div>
-
-          <div className="flex gap-2 p-3 bg-white border-b">
-            <button className="px-4 py-2 border" onClick={() => setMode("chat")}>
-              Chat
-            </button>
-
-            <button className="px-4 py-2 border" onClick={() => setMode("rag")}>
-              Docs
-            </button>
-
-            <button className="px-4 py-2 border" onClick={() => setMode("tool")}>
-              Tools
-            </button>
-          </div>
+  if (
+    getUser.isLoading ||
+    documentsQuery.isLoading ||
+    sessionsQuery.isLoading
+  ) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#1a1915]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-[#c9a96e] border-t-transparent animate-spin" />
+          <span className="text-[#8a8578] text-sm font-medium">Loading…</span>
         </div>
+      </div>
+    );
+  }
 
+  const user = getUser.data;
+
+  return (
+    <div className="h-screen flex bg-[#1a1915] text-[#e8e3d8] font-['Söhne','ui-sans-serif',system-ui,sans-serif] overflow-hidden">
+      <Sidebar
+        sessions={sessions}
+        activeSession={activeSession}
+        setActiveSession={setActiveSession}
+        user={user}
+      />
+
+      <div className="flex-1 flex overflow-hidden min-w-0">
         <ChatWindow
-          activeSession={
-            activeSession
-          }
-          selectedDocs={
-            selectedDocs
-          }
+          activeSession={activeSession}
+          selectedDocs={selectedDocs}
           mode={mode}
+          docPanelOpen={docPanelOpen}
+          setDocPanelOpen={setDocPanelOpen}
         />
       </div>
 
+      {docPanelOpen && (
+        <DocumentPanel
+          selectedDocs={selectedDocs}
+          setSelectedDocs={setSelectedDocs}
+          documents={documents}
+          setMode={setMode}
+          mode={mode}
+          onClose={() => setDocPanelOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -106,3 +106,16 @@ Answer:
 """
 
     return run_llm(prompt)
+
+def generate_session_title(question: str):
+    prompt = f"""
+Generate a short, clear title (max 5 words) for this conversation.
+
+Question:
+{question}
+
+Title:
+"""
+    title = run_llm(prompt)
+
+    return title.strip().replace('"', '')[:60]

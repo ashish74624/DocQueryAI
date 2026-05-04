@@ -1,40 +1,61 @@
 from langchain_huggingface import HuggingFaceEmbeddings
-
-from langchain_community.vectorstores import FAISS
+from langchain_qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
+from qdrant_client.models import Filter, FieldCondition, MatchAny, MatchValue
 
 from config import (
-    VECTOR_DB_DIR,
     EMBEDDING_MODEL,
-    TOP_K
+    TOP_K,
+    QDRANT_URL,
+    QDRANT_API_KEY,
+    QDRANT_COLLECTION
 )
 
 
-def load_db():
+def retrieve_docs(
+    question,
+    mode,
+    selected_docs,
+    user_id
+):
     embeddings = HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL
     )
 
-    db = FAISS.load_local(
-        VECTOR_DB_DIR,
-        embeddings,
-        allow_dangerous_deserialization=True
+    client = QdrantClient(
+        url=QDRANT_URL,
+        api_key=QDRANT_API_KEY
     )
 
-    return db
+    store = QdrantVectorStore(
+        client=client,
+        collection_name=QDRANT_COLLECTION,
+        embedding=embeddings
+    )
 
+    must_conditions = [
+        FieldCondition(
+            key="metadata.user_id",
+            match=MatchValue(value=user_id)
+        )
+    ]
 
-def retrieve_docs(question, mode, selected_docs):
-    db = load_db()
+    if mode == "selected" and selected_docs:
+        must_conditions.append(
+            FieldCondition(
+                key="metadata.doc_id",
+                match=MatchAny(
+                    any=selected_docs
+                )
+            )
+        )
 
-    docs = db.similarity_search(
+    docs = store.similarity_search(
         question,
-        k=TOP_K
+        k=TOP_K,
+        filter=Filter(
+            must=must_conditions
+        )
     )
-
-    if mode == "selected":
-        docs = [
-            d for d in docs
-            if d.metadata["doc_id"] in selected_docs
-        ]
 
     return docs

@@ -10,6 +10,7 @@ class AskRequest(BaseModel):
     question: str
     mode: str   # chat | rag | tool
     selected_docs: list[str]
+    tool_name: str | None = None 
 
 
 
@@ -22,3 +23,6 @@ class RegisterSchema(BaseModel):
 class LoginSchema(BaseModel):
     email: EmailStr
     password: str
+
+class SessionRename(BaseModel):
+    title: str

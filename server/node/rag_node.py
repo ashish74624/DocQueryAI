@@ -6,7 +6,8 @@ def rag_node(state):
     docs = retrieve_docs(
         state["question"],
         "selected",
-        state["selected_docs"]
+        state["selected_docs"],
+        state["user_id"]
     )
 
     answer = generate_rag_answer(

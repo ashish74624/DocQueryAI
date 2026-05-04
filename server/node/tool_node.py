@@ -1,34 +1,64 @@
-from tools.weather import get_weather
+from tools.tool_registry import TOOL_REGISTRY
 from llm import generate_with_memory
 
 
 def tool_node(state):
-    q = state["question"].lower()
+    tool_name = state.get("tool_name", "").strip()
+    question = state["question"]
 
-    if "weather" in q:
-        city = q.replace("weather in", "").strip()
-        answer = get_weather(city)
+    # ── known tool ──────────────────────────────────────────────────────────
+    if tool_name in TOOL_REGISTRY:
+        tool_fn = TOOL_REGISTRY[tool_name]
 
-        meta = {
-            "used_docs": False,
-            "used_model_knowledge": False,
-            "tools_used": ["weather_api"]
+        try:
+            result = tool_fn(question)
+        except Exception as e:
+            return {
+                "answer": f"Tool '{tool_name}' encountered an error: {str(e)}",
+                "docs": [],
+                "report_pdf": None,
+                "meta": {
+                    "used_docs": False,
+                    "used_model_knowledge": False,
+                    "tools_used": [tool_name],
+                    "error": str(e),
+                },
+            }
+
+        # research_report returns raw PDF bytes — store separately
+        if tool_name == "research_report":
+            return {
+                "answer": "Report generated successfully.",
+                "docs": [],
+                "report_pdf": result,          # bytes
+                "meta": {
+                    "used_docs": False,
+                    "used_model_knowledge": False,
+                    "tools_used": ["research_report"],
+                },
+            }
+
+        # all other tools return a plain string answer
+        return {
+            "answer": result,
+            "docs": [],
+            "report_pdf": None,
+            "meta": {
+                "used_docs": False,
+                "used_model_knowledge": False,
+                "tools_used": [tool_name],
+            },
         }
 
-    else:
-        answer = generate_with_memory(
-            state["question"],
-            state["memory"]
-        )
-
-        meta = {
-            "used_docs": False,
-            "used_model_knowledge": True,
-            "tools_used": []
-        }
-
+    # ── unknown tool → fall back to LLM ─────────────────────────────────────
+    answer = generate_with_memory(question, state.get("memory", []))
     return {
         "answer": answer,
         "docs": [],
-        "meta": meta
+        "report_pdf": None,
+        "meta": {
+            "used_docs": False,
+            "used_model_knowledge": True,
+            "tools_used": [],
+        },
     }
