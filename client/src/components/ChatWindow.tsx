@@ -12,7 +12,7 @@ const MODE_LABELS: Record<string, { label: string; icon: string; desc: string }>
 interface ChatWindowProps {
     activeSession: ChatSession | null;
     selectedDocs: string[];
-    mode:Mode;
+    mode: Mode;
     docPanelOpen: boolean;
     setDocPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -274,7 +274,7 @@ export default function ChatWindow(props: ChatWindowProps) {
                             placeholder={
                                 mode === "rag"
                                     ? "Ask about your documents… (Enter to send, Shift+Enter for newline)"
-                                    : "Message DocuQuery… (Enter to send, Shift+Enter for newline)"
+                                    : "Message DocQuery… (Enter to send, Shift+Enter for newline)"
                             }
                         />
                         <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-3 pb-2.5">

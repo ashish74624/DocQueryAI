@@ -3,7 +3,7 @@ import { useUtils } from "../hooks/useUtils";
 import type { ChatSession } from "../types";
 import SessionList from "./SessionList";
 
-interface SidebarProps{
+interface SidebarProps {
     sessions: ChatSession[];
     activeSession: ChatSession | null;
     setActiveSession: React.Dispatch<React.SetStateAction<ChatSession | null>>;
@@ -30,7 +30,7 @@ export default function Sidebar(props: SidebarProps) {
                             <path d="M7 1L9.5 5.5H12.5L10 8.5L11 13L7 10.5L3 13L4 8.5L1.5 5.5H4.5L7 1Z" fill="white" fillOpacity="0.9" />
                         </svg>
                     </div>
-                    <span className="font-semibold text-[15px] text-[#e8e3d8] tracking-tight">DocuQuery</span>
+                    <span className="font-semibold text-[15px] text-[#e8e3d8] tracking-tight">DocQuery</span>
                 </div>
             </div>
 

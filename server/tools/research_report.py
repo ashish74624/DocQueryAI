@@ -274,7 +274,7 @@ def _markdown_to_html(md: str, topic: str) -> str:
 <body>
   <div class="cover">
     <div class="cover-inner">
-      <p class="subtitle">Research Report · DocuQuery</p>
+      <p class="subtitle">Research Report · DocQuery</p>
     </div>
   </div>
   <div class="content">

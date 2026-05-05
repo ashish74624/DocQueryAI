@@ -35,7 +35,7 @@ export default function App() {
                             <path d="M7 1L9.5 5.5H12.5L10 8.5L11 13L7 10.5L3 13L4 8.5L1.5 5.5H4.5L7 1Z" fill="white" fillOpacity="0.95" />
                         </svg>
                     </div>
-                    <span className="font-semibold text-[15px] tracking-tight text-[#e8e3d8]">DocuQuery</span>
+                    <span className="font-semibold text-[15px] tracking-tight text-[#e8e3d8]">DocQuery</span>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
@@ -80,7 +80,7 @@ export default function App() {
                 </h1>
 
                 <p className="relative max-w-xl text-[17px] text-[#8a8578] leading-relaxed mb-10">
-                    DocuQuery lets you upload PDFs and get precise, cited answers — or generate brand-new research reports from live web sources. All documents, all the time.
+                    DocQuery lets you upload PDFs and get precise, cited answers — or generate brand-new research reports from live web sources. All documents, all the time.
                 </p>
 
                 <div className="relative flex items-center gap-3 flex-wrap justify-center">
@@ -111,7 +111,7 @@ export default function App() {
                         <div className="w-3 h-3 rounded-full bg-[#2e2c27]" />
                         <div className="flex-1 mx-4">
                             <div className="mx-auto w-48 h-5 rounded-md bg-[#1e1c18] flex items-center justify-center">
-                                <span className="text-[10px] text-[#3e3c35]">docuquery.app/ask</span>
+                                <span className="text-[10px] text-[#3e3c35]">docquery.app/ask</span>
                             </div>
                         </div>
                     </div>
@@ -191,7 +191,7 @@ export default function App() {
                                 Don't have a document?<br />Generate one.
                             </h2>
                             <p className="text-[#8a8578] text-[15px] leading-relaxed mb-6">
-                                Enter any topic and DocuQuery searches the live web, synthesises the findings, and delivers a structured PDF report — complete with citations, key findings, and a full analysis. Up to 5 pages, ready in under 30 seconds.
+                                Enter any topic and DocQuery searches the live web, synthesises the findings, and delivers a structured PDF report — complete with citations, key findings, and a full analysis. Up to 5 pages, ready in under 30 seconds.
                             </p>
                             <ul className="space-y-2.5">
                                 {[
@@ -282,7 +282,7 @@ export default function App() {
                             <path d="M7 1L9.5 5.5H12.5L10 8.5L11 13L7 10.5L3 13L4 8.5L1.5 5.5H4.5L7 1Z" fill="white" />
                         </svg>
                     </div>
-                    <span className="text-xs text-[#4a4840]">DocuQuery</span>
+                    <span className="text-xs text-[#4a4840]">DocQuery</span>
                 </div>
                 <p className="text-xs text-[#2e2c27]">Upload docs · Query them · Generate new ones</p>
             </footer>

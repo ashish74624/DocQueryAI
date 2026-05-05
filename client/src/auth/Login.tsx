@@ -50,7 +50,7 @@ export default function Login() {
                         </svg>
                     </div>
                     <h1 className="text-[22px] font-semibold text-[#e8e3d8] tracking-tight">
-                        DocuQuery
+                        DocQuery
                     </h1>
                     <p className="text-sm text-[#4a4840] mt-1">Sign in to your workspace</p>
                 </div>
@@ -153,7 +153,7 @@ export default function Login() {
 
                 {/* Footer */}
                 <p className="text-center text-[11px] text-[#2e2c27] mt-4">
-                    DocuQuery · RAG + Tool Chat
+                    DocQuery · RAG + Tool Chat
                 </p>
             </div>
         </div>

@@ -17,7 +17,7 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message": "DocuQuery API Running"}
+    return {"message": "DocQuery API Running"}
 
 app.include_router(auth.router)
 app.include_router(users.router)

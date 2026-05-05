@@ -47,7 +47,7 @@ export default function Register() {
                     <h1 className="text-[22px] font-semibold text-[#e8e3d8] tracking-tight">
                         Create an account
                     </h1>
-                    <p className="text-sm text-[#4a4840] mt-1">Join DocuQuery to get started</p>
+                    <p className="text-sm text-[#4a4840] mt-1">Join DocQuery to get started</p>
                 </div>
 
                 {/* Card */}
@@ -164,7 +164,7 @@ export default function Register() {
 
                 {/* Footer */}
                 <p className="text-center text-[11px] text-[#2e2c27] mt-4">
-                    DocuQuery · RAG + Tool Chat
+                    DocQuery · RAG + Tool Chat
                 </p>
             </div>
         </div>
