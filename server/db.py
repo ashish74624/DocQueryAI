@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+from config import DATABASE_URL
 
-DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Railway gives postgres:// → fix it
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):

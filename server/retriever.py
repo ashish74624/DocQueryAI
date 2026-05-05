@@ -1,16 +1,18 @@
-from langchain_huggingface import HuggingFaceEmbeddings
+# CHANGED: Swapped HuggingFaceEmbeddings (Local) for HuggingFaceEndpointEmbeddings (Cloud API)
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchAny, MatchValue
+import os # Added to fetch API token
 
 from config import (
     EMBEDDING_MODEL,
     TOP_K,
     QDRANT_URL,
     QDRANT_API_KEY,
-    QDRANT_COLLECTION
+    QDRANT_COLLECTION,
+    HUGGINGFACEHUB_API_TOKEN
 )
-
 
 def retrieve_docs(
     question,
@@ -18,8 +20,10 @@ def retrieve_docs(
     selected_docs,
     user_id
 ):
-    embeddings = HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL
+    # CHANGED: Now calls the Hugging Face API instead of loading the model into local RAM
+    embeddings = HuggingFaceEndpointEmbeddings(
+        model=EMBEDDING_MODEL,
+        huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN
     )
 
     client = QdrantClient(
